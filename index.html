@@ -50,6 +50,7 @@
       <p id="question">Question 1: Who created the first iPhone?</p>
       <input type="text" id="answer">
       <button onclick="checkAnswer()">Submit</button>
+      <button onclick="skipQuestion()">Skip</button>
     </div>
 
     <p id="feedback"></p>
@@ -83,16 +84,21 @@
         data += 5;
         document.getElementById('data').textContent = data;
         feedback.textContent = `Correct! +5GB. Total: ${data} GB.`;
-        lastAnswered = Date.now();
-        questionIndex++;
-        setTimeout(loadNextQuestion, 3600000); // 1 hour = 3600000 ms
       } else {
-        feedback.textContent = 'Wrong answer. Try again later.';
-        setTimeout(loadNextQuestion, 3600000);
-        questionIndex++;
+        feedback.textContent = 'Wrong answer. Try again in next question.';
       }
 
+      lastAnswered = Date.now();
+      questionIndex++;
       document.getElementById('answer').value = '';
+      setTimeout(loadNextQuestion, 10000); // 10 seconds for test
+    }
+
+    function skipQuestion() {
+      const feedback = document.getElementById('feedback');
+      feedback.textContent = 'Skipped. No data gained.';
+      questionIndex++;
+      setTimeout(loadNextQuestion, 10000); // 10 seconds for test
     }
 
     function loadNextQuestion() {
@@ -103,18 +109,17 @@
         feedback.textContent = '';
         questionBox.classList.remove('hidden');
       } else {
-        feedback.textContent = 'You answered all questions. Come back next hour.';
+        feedback.textContent = 'You answered all questions. Come back later.';
         questionBox.classList.add('hidden');
       }
     }
 
-    // Check every 10 seconds if data is zero
     setInterval(() => {
       if (data <= 0) {
-        fetch('block-internet.ps1'); // you can replace this with local trigger logic
+        // Simulated block: Replace this with actual code to call PowerShell if needed
+        console.log("Internet would be blocked now.");
       }
     }, 10000);
-
   </script>
 </body>
 </html>
