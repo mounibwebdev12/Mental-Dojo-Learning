@@ -1,1 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Free Data Generator</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    #container {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 10px;
+      background-color: white;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h2>Your Data: <span id="data">0</span> GB</h2>
+
+    <div id="questionBox">
+      <p id="question">Question 1: Who created the first iPhone?</p>
+      <input type="text" id="answer">
+      <button onclick="checkAnswer()">Submit</button>
+    </div>
+
+    <p id="feedback"></p>
+  </div>
+
+  <script>
+    let data = 0;
+    let questionIndex = 0;
+    let lastAnswered = 0;
+
+    const questions = [
+      {
+        question: "Who created the first iPhone?",
+        answer: "steve jobs"
+      },
+      {
+        question: "Who founded Nike?",
+        answer: "phil knight"
+      },
+      {
+        question: "When was ChatGPT created?",
+        answer: "2022"
+      }
+    ];
+
+    function checkAnswer() {
+      const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+      const feedback = document.getElementById('feedback');
+
+      if (userAnswer === questions[questionIndex].answer) {
+        data += 5;
+        document.getElementById('data').textContent = data;
+        feedback.textContent = `Correct! +5GB. Total: ${data} GB.`;
+        lastAnswered = Date.now();
+        questionIndex++;
+        setTimeout(loadNextQuestion, 3600000); // 1 hour = 3600000 ms
+      } else {
+        feedback.textContent = 'Wrong answer. Try again later.';
+        setTimeout(loadNextQuestion, 3600000);
+        questionIndex++;
+      }
+
+      document.getElementById('answer').value = '';
+    }
+
+    function loadNextQuestion() {
+      const questionBox = document.getElementById('questionBox');
+      const feedback = document.getElementById('feedback');
+      if (questionIndex < questions.length) {
+        document.getElementById('question').textContent = `Question ${questionIndex + 1}: ${questions[questionIndex].question}`;
+        feedback.textContent = '';
+        questionBox.classList.remove('hidden');
+      } else {
+        feedback.textContent = 'You answered all questions. Come back next hour.';
+        questionBox.classList.add('hidden');
+      }
+    }
+
+    // Check every 10 seconds if data is zero
+    setInterval(() => {
+      if (data <= 0) {
+        fetch('block-internet.ps1'); // you can replace this with local trigger logic
+      }
+    }, 10000);
+
+  </script>
+</body>
+</html>
 
