@@ -1,126 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Free Data Generator</title>
+  <meta charset="UTF-8">
+  <title>Mental Upload Spiral</title>
   <style>
     body {
       background-color: black;
       color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    #container {
-      background-color: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
+      font-family: sans-serif;
       text-align: center;
+      overflow: hidden;
     }
-    input[type="text"] {
-      width: 100%;
-      padding: 8px;
-      margin-top: 10px;
-      border-radius: 5px;
-      border: none;
+
+    #spiral {
+      width: 200px;
+      height: 200px;
+      margin: 50px auto;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/7/7e/Hypnotic_Spiral.svg') no-repeat center;
+      background-size: cover;
+      animation: spin 10s linear infinite;
     }
-    button {
-      padding: 10px;
-      background-color: white;
-      color: black;
-      font-weight: bold;
-      border: none;
-      border-radius: 5px;
-      margin-top: 10px;
-      cursor: pointer;
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
     }
-    .hidden {
+
+    #message {
+      font-size: 2em;
+      margin-top: 30px;
+      transition: opacity 1s ease;
+    }
+
+    #upload-complete {
+      font-size: 2em;
+      color: lime;
       display: none;
+      margin-top: 40px;
     }
   </style>
 </head>
 <body>
-  <div id="container">
-    <h2>Your Data: <span id="data">0</span> GB</h2>
 
-    <div id="questionBox">
-      <p id="question">Question 1: Who created the first iPhone?</p>
-      <input type="text" id="answer">
-      <button onclick="checkAnswer()">Submit</button>
-      <button onclick="skipQuestion()">Skip</button>
-    </div>
-
-    <p id="feedback"></p>
-  </div>
+  <h1>🧠 Mental Upload Machine</h1>
+  <input type="file" id="fileInput" accept=".txt">
+  <div id="spiral"></div>
+  <div id="message">Waiting for upload...</div>
+  <div id="upload-complete">✅ Upload Complete</div>
 
   <script>
-    let data = 0;
-    let questionIndex = 0;
-    let lastAnswered = 0;
+    const fileInput = document.getElementById('fileInput');
+    const message = document.getElementById('message');
+    const complete = document.getElementById('upload-complete');
 
-    const questions = [
-      {
-        question: "Who created the first iPhone?",
-        answer: "steve jobs"
-      },
-      {
-        question: "Who founded Nike?",
-        answer: "phil knight"
-      },
-      {
-        question: "When was ChatGPT created?",
-        answer: "2022"
-      }
-    ];
+    fileInput.addEventListener('change', function () {
+      const file = fileInput.files[0];
+      if (!file) return;
 
-    function checkAnswer() {
-      const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
-      const feedback = document.getElementById('feedback');
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const lines = e.target.result.split('\n').filter(line => line.trim() !== "");
+        let index = 0;
+        const startTime = Date.now();
 
-      if (userAnswer === questions[questionIndex].answer) {
-        data += 5;
-        document.getElementById('data').textContent = data;
-        feedback.textContent = `Correct! +5GB. Total: ${data} GB.`;
-      } else {
-        feedback.textContent = 'Wrong answer. Try again in next question.';
-      }
+        message.style.opacity = 1;
+        message.innerText = "Beginning mental upload...";
 
-      lastAnswered = Date.now();
-      questionIndex++;
-      document.getElementById('answer').value = '';
-      setTimeout(loadNextQuestion, 10000); // 10 seconds for test
-    }
+        setTimeout(() => {
+          const interval = setInterval(() => {
+            const elapsed = (Date.now() - startTime) / 1000;
+            if (elapsed >= 60) {
+              clearInterval(interval);
+              message.style.opacity = 0;
+              complete.style.display = "block";
+              return;
+            }
 
-    function skipQuestion() {
-      const feedback = document.getElementById('feedback');
-      feedback.textContent = 'Skipped. No data gained.';
-      questionIndex++;
-      setTimeout(loadNextQuestion, 10000); // 10 seconds for test
-    }
-
-    function loadNextQuestion() {
-      const questionBox = document.getElementById('questionBox');
-      const feedback = document.getElementById('feedback');
-      if (questionIndex < questions.length) {
-        document.getElementById('question').textContent = `Question ${questionIndex + 1}: ${questions[questionIndex].question}`;
-        feedback.textContent = '';
-        questionBox.classList.remove('hidden');
-      } else {
-        feedback.textContent = 'You answered all questions. Come back later.';
-        questionBox.classList.add('hidden');
-      }
-    }
-
-    setInterval(() => {
-      if (data <= 0) {
-        // Simulated block: Replace this with actual code to call PowerShell if needed
-        console.log("Internet would be blocked now.");
-      }
-    }, 10000);
+            message.style.opacity = 0;
+            setTimeout(() => {
+              message.innerText = lines[index % lines.length];
+              message.style.opacity = 1;
+              index++;
+            }, 1000);
+          }, 3000); // change message every 3 seconds
+        }, 2000); // small delay before first message
+      };
+      reader.readAsText(file);
+    });
   </script>
+
 </body>
 </html>
-
